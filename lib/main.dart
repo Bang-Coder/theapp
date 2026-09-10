@@ -38,21 +38,21 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFF0b0f11))
+      ..setOnConsoleMessage((msg) {
+        debugPrint("Console: ${msg.message}");
+      })
       ..setNavigationDelegate(NavigationDelegate(
         onPageStarted: (url) {
-          debugPrint("🌐 Started: $url");
+          debugPrint("Page started: $url");
           if (mounted) setState(() => _status = "Page started");
         },
         onPageFinished: (url) {
-          debugPrint("✅ Finished: $url");
+          debugPrint("Page finished: $url");
           if (mounted) setState(() => _status = "Page finished");
         },
         onWebResourceError: (err) {
-          debugPrint("❌ Resource error: ${err.description} (${err.errorCode})");
+          debugPrint("Resource error: ${err.description} (${err.errorCode})");
           if (mounted) setState(() => _status = "Error: ${err.description}");
-        },
-        onConsoleMessage: (msg) {
-          debugPrint("🖥 Console: ${msg.message}");
         },
       ));
 
@@ -62,20 +62,16 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
   Future<void> _loadHtml() async {
     try {
       final html = await rootBundle.loadString('assets/html/index.html');
-      debugPrint("📄 HTML size: ${html.length} chars");
+      debugPrint("HTML size: ${html.length} chars");
 
-      // ⚡ THE KEY FIX — pass a baseUrl so the WebView
-      // treats the page as coming from a real https origin.
-      // Without this, Android blocks all external requests
-      // (Tailwind, React, Babel, Google Fonts, Unsplash).
       await _controller.loadHtmlString(
         html,
-        baseUrl: 'https://greenscape.app/', // any real-looking domain
+        baseUrl: 'https://greenscape.app/',
       );
 
       if (mounted) setState(() => _ready = true);
     } catch (e, st) {
-      debugPrint("💥 $e\n$st");
+      debugPrint("Failed: $e\n$st");
       if (mounted) setState(() => _status = "Failed: $e");
     }
   }
@@ -97,8 +93,7 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
                     children: [
                       const CircularProgressIndicator(color: Color(0xFF00e676)),
                       const SizedBox(height: 16),
-                      Text(_status,
-                          style: const TextStyle(color: Colors.white70)),
+                      Text(_status, style: const TextStyle(color: Colors.white70)),
                     ],
                   ),
                 ),
