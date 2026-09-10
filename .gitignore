@@ -46,3 +46,10 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+
+# nobody should upload these file except me
+android/key.properties
+android/release.keystore
+android/*.keystore
+android/*.jks
